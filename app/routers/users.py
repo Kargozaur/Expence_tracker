@@ -6,12 +6,14 @@ from fastapi import (
     status,
     Response,
 )
-from copy import deepcopy
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.settings import settings
 from auth.oauth import create_refresh_token, create_token
 from utility.hash_password import hash_password, verify_password
-from utility.hash_token import hash_refresh_token
+from utility.hash_token import (
+    hash_refresh_token,
+)
 from models.models import User, RefreshToken
 from dependancies.user_dependancy import get_user
 from schemas.schemas import LoginUser, CreateUser, Token
@@ -69,14 +71,23 @@ async def login(
             detail="User is not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    uid = deepcopy(user.id)
-    short_token: str = create_token(
-        data={"sub": str(user.id), "email": user.email}
-    )
-    refresh_token: str = create_refresh_token(
-        data={"sub": str(uid), "email": user.email}
-    )
+
     try:
+        await db.execute(
+            update(RefreshToken)
+            .where(
+                RefreshToken.user_id == user.id,
+                RefreshToken.revoked_at.is_(None),
+            )
+            .values(revoked_at=datetime.now(timezone.utc))
+        )
+        await db.flush()
+        short_token: str = create_token(
+            data={"sub": str(user.id), "email": user.email}
+        )
+        refresh_token: str = create_refresh_token(
+            data={"sub": str(user.id), "email": user.email}
+        )
         new_refresh = RefreshToken(
             token=hash_refresh_token(refresh_token),
             user_id=user.id,
