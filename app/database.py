@@ -9,8 +9,10 @@ engine = create_async_engine(
 )
 
 AsyncSessionLocal = sessionmaker(
-    bing=engine, class_=AsyncSession, autoflush=False
-)
+    bind=engine,  # type: ignore
+    class_=AsyncSession,
+    autoflush=False,  # type: ignore
+)  # type: ignore
 
 
 async def get_db():  # type: ignore

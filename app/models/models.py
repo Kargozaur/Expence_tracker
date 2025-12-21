@@ -157,10 +157,12 @@ class RefreshToken(Base):
     )
 
     revoked_at: Mapped[datetime | None] = mapped_column(
-        TIMESTAMP(timezone=True), nullable=True
+        TIMESTAMP(timezone=True),
+        nullable=True,
+        server_default=text("null"),
     )
 
-    users = relationship("User", back_populates="token")
+    users = relationship("User", back_populates="tokens")
 
     @property
     def is_revoked(self) -> bool:

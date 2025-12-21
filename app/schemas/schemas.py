@@ -12,24 +12,24 @@ from pydantic import (
 from pydantic_settings import SettingsConfigDict
 
 
-class BaseEnum(Enum, str):
-    pass
+# class BaseEnum(Enum, str):
+#     pass
 
 
-class ExpensesCategory(BaseEnum):
-    Cafe = "Cafe"
-    Groceries = "Groceries"
-    Construction_materials = "Construction materials"
-    Clothes = "Clothes"
-    Health = "Health"
-    Taxi = "Taxi"
-    Other = "Other"
+# class ExpensesCategory(BaseEnum):
+#     Cafe = "Cafe"
+#     Groceries = "Groceries"
+#     Construction_materials = "Construction materials"
+#     Clothes = "Clothes"
+#     Health = "Health"
+#     Taxi = "Taxi"
+#     Other = "Other"
 
 
-class Currency(BaseEnum):
-    uah = "₴"
-    euro = "€"
-    usd = "$"
+# class Currency(BaseEnum):
+#     uah = "₴"
+#     euro = "€"
+#     usd = "$"
 
 
 class CreateUser(BaseModel):
@@ -40,11 +40,11 @@ class CreateUser(BaseModel):
     @classmethod
     def verify_password(cls, value: str) -> str:
         if not re.search(r"[A-Z]", value):
-            raise ValidationError("password.uppercase_required")
+            raise ValueError("password.uppercase_required")
         if not re.search(r"\d", value):
-            raise ValidationError("password.number_required")
+            raise ValueError("password.number_required")
         if not re.search(r"[!@#$%^&*(),.:<>|?]", value):
-            raise ValidationError("password.specialsymbol_required")
+            raise ValueError("password.specialsymbol_required")
         return value
 
 
@@ -53,12 +53,12 @@ class LoginUser(BaseModel):
     password: str
 
 
-class CreateExpense(BaseModel):
-    category: ExpensesCategory
-    currency: Currency
-    amount: int | float
-    note: Optional[str] = None
-    expense_date: datetime
+# class CreateExpense(BaseModel):
+#     category: ExpensesCategory
+#     currency: Currency
+#     amount: int | float
+#     note: Optional[str] = None
+#     expense_date: datetime
 
 
 class GetExpenses(BaseModel):

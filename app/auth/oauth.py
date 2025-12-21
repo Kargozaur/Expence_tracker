@@ -5,22 +5,37 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
-from app.schemas.schemas import TokenPayload
+from schemas.schemas import TokenPayload
 from database import get_db
 from models.models import User
 from core.settings import settings
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="login", auto_error=False
+)
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+EXPIRE_MINUTES_REFRESH = settings.LONG_EXPIRE
 
 
 def create_token(data: dict[str, Any]) -> str:
     to_encode = data.copy()
     expire: datetime | float = datetime.now() + timedelta(
         minutes=EXPIRE_MINUTES  # type: ignore
+    )
+    to_encode.update({"exp": expire})
+    encoded: str = jwt.encode(
+        claims=to_encode, key=SECRET_KEY, algorithm=ALGORITHM
+    )
+    return encoded
+
+
+def create_refresh_token(data: dict[str, Any]) -> str:
+    to_encode = data.copy()
+    expire: datetime | float = datetime.now() + timedelta(
+        minutes=EXPIRE_MINUTES_REFRESH  # type: ignore
     )
     to_encode.update({"exp": expire})
     encoded: str = jwt.encode(
