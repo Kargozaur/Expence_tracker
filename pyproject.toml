@@ -1,0 +1,13 @@
+[project]
+name = "expence-tracker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.17.2",
+    "asyncpg>=0.31.0",
+    "fastapi[all]>=0.126.0",
+    "python-jose>=3.5.0",
+    "sqlalchemy>=2.0.45",
+]

@@ -1,0 +1,5 @@
+{
+    "ruff.format.preview": false,
+    "ruff.lineLength": 70,
+    "python.analysis.typeCheckingMode": "strict"
+}
