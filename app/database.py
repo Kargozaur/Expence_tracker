@@ -19,5 +19,9 @@ async def get_db():  # type: ignore
     async with AsyncSessionLocal() as session:  # type: ignore
         try:
             yield session
+            await session.commit()  # type: ignore
+        except:
+            await session.rollback()  # type: ignore
+            raise
         finally:
             await session.close()  # type: ignore
