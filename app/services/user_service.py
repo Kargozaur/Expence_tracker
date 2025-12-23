@@ -9,6 +9,11 @@ from repositories.user_dependancy import (
 from repositories.password_dependancy import (
     IPasswordHasher,
 )
+from core.errors import (
+    UserDoesntExist,
+    UserAlreadyExists,
+    WrongCredentials,
+)
 
 
 class UserService:
@@ -26,16 +31,14 @@ class UserService:
 
     async def validate_user_data(self, user_data: CreateUser):
         if not user_data.email or not user_data.password:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT
-            )
+            raise WrongCredentials
 
     async def check_user_exists(self, email: str) -> None:
         existing_user = await self.user_repository.get_user_by_email(
             email
         )
         if existing_user:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT)
+            raise UserAlreadyExists
 
     async def create_user(self, user_data: CreateUser) -> User:
         await self.validate_user_data(user_data)
@@ -54,14 +57,12 @@ class UserService:
             user_data.email
         )
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+            raise UserDoesntExist
 
         if not self.password_repository.verify_password(
             user_data.password, user.password
         ):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED
-            )
+            raise WrongCredentials
 
         access_token = self.token_service.create_token(user)
         refresh_token, expires_at = (

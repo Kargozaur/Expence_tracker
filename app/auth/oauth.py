@@ -1,9 +1,12 @@
 from fastapi import status, Depends, HTTPException
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordBearer
+from jose import jwt
+from schemas.schemas import TokenPayload
 from database import get_db
 from models.models import User
+from core.settings import settings
+from core.errors import InvalidTokenError
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="login", auto_error=False
@@ -11,19 +14,16 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 def verify_access_token(
-    self, token: str, credential_exception: Exception
+    token: str, credential_exception: Exception
 ) -> TokenPayload:
     try:
-        payload: dict[str, Any] = jwt.decode(
-            token=token,
-            key=self.secret_key,
-            algorithms=self.algorithm,
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
         )
-        id = payload.get("sub")
-        if not id:
-            raise credential_exception
-        return TokenPayload(sub=id)
-    except JWTError:
+        return TokenPayload(**payload)
+    except InvalidTokenError:
         raise credential_exception
 
 
@@ -40,8 +40,7 @@ async def get_current_user(
     if not token_data.sub:
         raise credential_exception
     uid: int = int(token_data.sub)
-    result = await db.execute(select(User).where(User.id == uid))
-    user = result.scalar_one_or_none()
+    user = await db.get(User, uid)
     if not user:
         raise credential_exception
     return user
