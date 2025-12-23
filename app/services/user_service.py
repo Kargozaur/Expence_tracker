@@ -1,4 +1,3 @@
-from fastapi import HTTPException, status
 from services.token_service import ITokenService
 from repositories.token_dependancy import ITokenRepository
 from models.models import User
@@ -70,7 +69,9 @@ class UserService:
         )
 
         await self.token_repository.save(
-            user.id, refresh_token, expires_at=expires_at
+            user.id,
+            refresh_token,
+            expires_at=expires_at,
         )
 
         return {
