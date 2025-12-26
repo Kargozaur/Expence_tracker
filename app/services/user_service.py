@@ -29,10 +29,16 @@ class UserService:
         self.token_service = token_service
 
     async def validate_user_data(self, user_data: CreateUser):
+        """Data validation when creating user"""
         if not user_data.email or not user_data.password:
             raise WrongCredentials
 
     async def check_user_exists(self, email: str) -> None:
+        """
+        Method to check if user email is in db when trying to create a new one
+        Raises:
+            UserAlreadyExists: _description_
+        """
         existing_user: (
             User | None
         ) = await self.user_repository.get_user_by_email(email)
@@ -52,6 +58,17 @@ class UserService:
         return new_user
 
     async def login_user(self, user_data: LoginUser):
+        """
+        Right now the main problem with the authorization handling is that
+        user can create multiple tockens. Solution to that is to check the device
+        (to dodge the collisions between mobile's/laptops/tablets/etc.).
+        I'm not sure should I do it inside not so complex project.
+
+        Raises:
+            UserDoesntExist: _description_
+            WrongCredentials: _description_
+
+        """
         user = await self.user_repository.get_user_by_email(
             user_data.email
         )
@@ -63,6 +80,7 @@ class UserService:
         ):
             raise WrongCredentials
 
+        await self.token_repository.revoke_token(user.id)
         access_token: str = self.token_service.create_token(user)
         refresh_token, expires_at = (
             self.token_service.create_refresh_token(user)
@@ -73,7 +91,6 @@ class UserService:
             refresh_token,
             expires_at=expires_at,
         )
-
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
@@ -81,4 +98,5 @@ class UserService:
         }
 
     async def logout_user(self, user_id):
+        """If front-end would be made, revokes token, setting expire_date at db at the current datetime."""
         await self.token_repository.revoke_token(user_id)
