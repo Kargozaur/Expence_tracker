@@ -71,8 +71,7 @@ class Expenses(Base):
         nullable=False,
         index=True,
     )
-    category_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
+    category_id: Mapped[int] = mapped_column(
         ForeignKey("expenses_category.id", ondelete="SET NULL"),
         nullable=True,
     )
@@ -99,8 +98,8 @@ class Category(Base):
 
     __tablename__ = "expenses_category"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
     )
     category_name: Mapped[str] = mapped_column()
 
@@ -116,8 +115,8 @@ class Currency(Base):
 
     __tablename__ = "currency"
 
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    id: Mapped[int] = mapped_column(
+        primary_key=True,
     )
     code: Mapped[str] = mapped_column(nullable=False)
     name: Mapped[str] = mapped_column(String(50))
