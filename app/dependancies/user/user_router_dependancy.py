@@ -2,9 +2,9 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.token_service import TokenService
 from database import get_db
-from repositories.user_dependancy import UserRepository
-from repositories.password_dependancy import PasswordHasher
-from repositories.token_dependancy import TokenRepository
+from repositories.user_repository import UserRepository
+from repositories.password_repository import PasswordHasher
+from repositories.token_repository import TokenRepository
 from services.user_service import UserService
 from core.settings import Settings
 

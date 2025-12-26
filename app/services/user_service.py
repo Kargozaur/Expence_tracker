@@ -1,11 +1,11 @@
 from services.token_service import ITokenService
-from repositories.token_dependancy import ITokenRepository
+from repositories.token_repository import ITokenRepository
 from models.models import User
 from schemas.schemas import CreateUser, LoginUser
-from repositories.user_dependancy import (
+from repositories.user_repository import (
     IUserRepository,
 )
-from repositories.password_dependancy import (
+from repositories.password_repository import (
     IPasswordHasher,
 )
 from core.errors import (
