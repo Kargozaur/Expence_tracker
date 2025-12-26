@@ -33,9 +33,9 @@ class UserService:
             raise WrongCredentials
 
     async def check_user_exists(self, email: str) -> None:
-        existing_user = await self.user_repository.get_user_by_email(
-            email
-        )
+        existing_user: (
+            User | None
+        ) = await self.user_repository.get_user_by_email(email)
         if existing_user:
             raise UserAlreadyExists
 
@@ -63,7 +63,7 @@ class UserService:
         ):
             raise WrongCredentials
 
-        access_token = self.token_service.create_token(user)
+        access_token: str = self.token_service.create_token(user)
         refresh_token, expires_at = (
             self.token_service.create_refresh_token(user)
         )
@@ -79,3 +79,6 @@ class UserService:
             "refresh_token": refresh_token,
             "token_type": "bearer",
         }
+
+    async def logout_user(self, user_id):
+        await self.token_repository.revoke_token(user_id)

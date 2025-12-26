@@ -1,3 +1,4 @@
+import uuid
 from fastapi import status, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordBearer
@@ -39,7 +40,7 @@ async def get_current_user(
     token_data = verify_access_token(token, credential_exception)
     if not token_data.sub:
         raise credential_exception
-    uid: int = int(token_data.sub)
+    uid: uuid.UUID = token_data.sub
     user = await db.get(User, uid)
     if not user:
         raise credential_exception

@@ -10,7 +10,7 @@ from pydantic import (
     ValidationError,
 )
 from pydantic_settings import SettingsConfigDict
-
+import uuid
 
 # class BaseEnum(Enum, str):
 #     pass
@@ -77,5 +77,5 @@ class Token(BaseModel):
 
 
 class TokenPayload(BaseModel):
-    sub: int | None = None
+    sub: uuid.UUID | None = None
     exp: int | None = None

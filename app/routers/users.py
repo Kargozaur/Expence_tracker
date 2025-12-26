@@ -15,6 +15,7 @@ from core.errors import (
     UserAlreadyExists,
     WrongCredentials,
 )
+from auth.oauth import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -52,3 +53,12 @@ async def login_user(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Email or password is not correct",
         )
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logour_user(
+    current_user=Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service),
+):
+    await user_service.logout_user(current_user.id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
