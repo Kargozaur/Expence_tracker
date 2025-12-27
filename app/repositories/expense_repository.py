@@ -48,7 +48,7 @@ class IExpenseRepository(ABC):
         self,
         user_id: uuid.UUID,
         expense_id: int,
-        new_data: UpdateExpense,
+        new_data: dict,
     ):
         pass
 
@@ -66,13 +66,16 @@ class ExpenseRepository(IExpenseRepository):
     def __init__(self, db: AsyncSession):
         self._db_session = db
 
+    def get_expense(self) -> Select:
+        return select(Expenses)
+
     def base_expense_query(self) -> Select:
         return (
             select(
                 Expenses.id,
                 Category.category_name,
                 Expenses.amount,
-                Currency.symbol.label("currency_symbol"),
+                Currency.symbol.label("currency_code"),
                 Expenses.note,
                 extract("year", Expenses.expense_date).label("year"),
                 extract("month", Expenses.expense_date).label(
@@ -153,30 +156,29 @@ class ExpenseRepository(IExpenseRepository):
 
     async def create_expense(self, expense_data: Expenses):
         self._db_session.add(expense_data)
+        await self._db_session.flush()
+
+        query = self.base_expense_query().where(
+            Expenses.id == expense_data.id
+        )
+        result = await self._db_session.execute(query)
+        row = result.mappings().first()
+        return row
 
     async def delete_expense(
         self, user_id: uuid.UUID, expense_id: int
     ):
-        query = self.base_expense_query()
-        query = self._by_expense_id_and_user(
-            query, user_id, expense_id
-        )
-        result = await self._db_session.execute(query)
-        row = result.scalar_one_or_none()
-        if not row:
-            return False
-
-        deletion_query = delete(Expenses).where(
+        query = delete(Expenses).where(
             Expenses.id == expense_id, Expenses.user_id == user_id
         )
-
-        await self._db_session.execute(deletion_query)
+        result = await self._db_session.execute(query)
+        return result.rowcount > 0
 
     async def change_expense(
         self,
         user_id: uuid.UUID,
         expense_id: int,
-        new_data: UpdateExpense,
+        new_data: dict,
     ) -> bool:
         """
         Returns True if row was found and updated
@@ -184,12 +186,10 @@ class ExpenseRepository(IExpenseRepository):
         """
         query = (
             update(Expenses)
-            .values(new_data.model_dump())
+            .values(**new_data)
             .where(
                 Expenses.user_id == user_id, Expenses.id == expense_id
             )
-            .returning(Expenses.id)
         )
         result = await self._db_session.execute(query)
-        row = result.rowcount > 0
-        return row
+        return result.rowcount

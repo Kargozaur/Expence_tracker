@@ -6,8 +6,8 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy import Boolean, ForeignKey, String, text
 from sqlalchemy.dialects.postgresql import UUID
-from datetime import datetime, timezone
-from sqlalchemy.types import TIMESTAMP
+from datetime import datetime, timezone, date
+from sqlalchemy.types import Date, TIMESTAMP
 import uuid
 
 
@@ -89,9 +89,7 @@ class Expenses(Base):
     note: Mapped[str] = mapped_column(
         String(500), nullable=True, server_default=""
     )
-    expense_date: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True)
-    )
+    expense_date: Mapped[date] = mapped_column(Date)
 
     users = relationship("User", back_populates="expenses")
     categories = relationship("Category", back_populates="expenses")

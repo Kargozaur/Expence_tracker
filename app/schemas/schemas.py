@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 import re
 from enum import StrEnum
 from typing import Optional, Annotated
@@ -16,7 +16,7 @@ from utility.date_validator import validate_date
 from decimal import Decimal
 
 CheckExpense = Annotated[Decimal, AfterValidator(is_positive)]
-NotInFuture = Annotated[datetime, AfterValidator(validate_date)]
+NotInFuture = Annotated[date, AfterValidator(validate_date)]
 
 
 class ExpensesCategory(StrEnum):
@@ -98,21 +98,21 @@ class GetExpenses(BaseModel):
     id: int
     category_name: str
     currency_code: str
-    amount: str
-    note: str
-    year: str
-    month: str
-    day: str
+    amount: float
+    note: str | None
+    year: int
+    month: int
+    day: int
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class UpdateExpense(BaseModel):
-    category_name: ExpensesCategory | None = None
-    currency_code: Currency | None = None
-    amount: CheckExpense | None = None
-    expense_date: NotInFuture | None = None
-    note: str | None = None
+    category_name: Optional[ExpensesCategory] = None
+    currency_code: Optional[Currency] = None
+    amount: Optional[CheckExpense] = None
+    expense_date: Optional[NotInFuture] = None
+    note: Optional[str] = ""
 
 
 class Token(BaseModel):
