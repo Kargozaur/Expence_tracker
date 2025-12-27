@@ -1,13 +1,19 @@
-from fastapi.openapi.utils import status_code_ranges
+from typing import Optional
 from fastapi import (
     APIRouter,
     HTTPException,
     Depends,
     status,
     Response,
+    Query,
 )
 from services.expense_service import ExpenseService
-from schemas.schemas import CreateExpense, GetExpenses, UpdateExpense
+from schemas.schemas import (
+    CreateExpense,
+    GetExpenses,
+    UpdateExpense,
+    ExpensesCategory,
+)
 from dependancies.expenses.expenses_router_dependancy import (
     get_expense_service,
 )
@@ -58,12 +64,20 @@ async def create_expense(
 )
 async def get_all_expenses(
     pagination: PaginationDep,
+    category: Optional[ExpensesCategory] = Query(
+        default=None, description="Filter by category"
+    ),
     expense_service: ExpenseService = Depends(get_expense_service),
     current_user=Depends(get_current_user),
 ):
-    expenses = await expense_service.get_all_expenses(
-        current_user.id, pagination
-    )
+    if not category:
+        expenses = await expense_service.get_all_expenses(
+            current_user.id, pagination
+        )
+    else:
+        expenses = await expense_service.get_expense_by_category(
+            current_user.id, category, pagination
+        )
     return expenses
 
 
@@ -81,23 +95,6 @@ async def get_expense_by_id(
         current_user.id, id
     )
     return expense
-
-
-@router.get(
-    "/{category_name}",
-    response_model=list[GetExpenses],
-    status_code=status.HTTP_200_OK,
-)
-async def get_expenses_by_category(
-    category_name: str,
-    pagination: PaginationDep,
-    expense_service: ExpenseService = Depends(get_expense_service),
-    current_user=Depends(get_current_user),
-):
-    expenses = await expense_service.get_expense_by_category(
-        current_user.id, category_name, pagination
-    )
-    return expenses
 
 
 @router.patch(
