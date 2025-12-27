@@ -49,14 +49,14 @@ class Currency(StrEnum):
     ('CHF', 'Swiss Franc')
     """
 
-    USD = "$"
-    EUR = "€"
-    GBP = "£"
-    UAH = "₴"
-    PLN = "zł"
-    JPY = "¥"
-    CAD = "C$"
-    CHF = "Fr"
+    USD = "USD"
+    EUR = "EUR"
+    GBP = "GBP"
+    UAH = "UAH"
+    PLN = "PLN"
+    JPY = "JPY"
+    CAD = "CAD"
+    CHF = "CHF"
 
 
 class CreateUser(BaseModel):
@@ -91,7 +91,7 @@ class CreateExpense(BaseModel):
 
 
 class GetExpenses(BaseModel):
-    id: uuid.UUID
+    id: int
     category_name: str
     currency_symbol: str
     amount: str
