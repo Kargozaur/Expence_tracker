@@ -12,3 +12,7 @@ class WrongCredentials(Exception):
 
 class UserAlreadyExists(Exception):
     pass
+
+
+class ExpensesDoesNotExists(Exception):
+    pass

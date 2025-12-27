@@ -1,35 +1,62 @@
 from datetime import datetime
 import re
-from enum import Enum
+from enum import StrEnum
 from typing import Optional
 from pydantic import (
     BaseModel,
     EmailStr,
     Field,
     field_validator,
-    ValidationError,
+    ConfigDict,
+    Field,
 )
-from pydantic_settings import SettingsConfigDict
 import uuid
 
-# class BaseEnum(Enum, str):
-#     pass
+
+class ExpensesCategory(StrEnum):
+    """
+    ('Food & Groceries'),
+    ('Transportation'),
+    ('Housing & Utilities'),
+    ('Entertainment'),
+    ('Health'),
+    ('Education'),
+    ('Shopping'),
+    ('Travel'),
+    ('Other')
+
+    """
+
+    Food_and_Groceries = "Food & Groceries"
+    Transport = "Transportation"
+    Housing_and_utilities = "Housing & Utilities"
+    Health = "Health"
+    Education = "Education"
+    Shopping = "Shopping"
+    Travel = "Travel"
+    Other = "Other"
 
 
-# class ExpensesCategory(BaseEnum):
-#     Cafe = "Cafe"
-#     Groceries = "Groceries"
-#     Construction_materials = "Construction materials"
-#     Clothes = "Clothes"
-#     Health = "Health"
-#     Taxi = "Taxi"
-#     Other = "Other"
+class Currency(StrEnum):
+    """
+    ('USD', 'US Dollar')
+    ('EUR', 'Euro')
+    ('GBP', 'British Pound')
+    ('UAH', 'Ukrainian Hryvnia)
+    ('PLN', 'Polish Złoty')
+    ('JPY', 'Japanese Yen')
+    ('CAD', 'Canadian Dollar')
+    ('CHF', 'Swiss Franc')
+    """
 
-
-# class Currency(BaseEnum):
-#     uah = "₴"
-#     euro = "€"
-#     usd = "$"
+    USD = "$"
+    EUR = "€"
+    GBP = "£"
+    UAH = "₴"
+    PLN = "zł"
+    JPY = "¥"
+    CAD = "C$"
+    CHF = "Fr"
 
 
 class CreateUser(BaseModel):
@@ -53,22 +80,27 @@ class LoginUser(BaseModel):
     password: str
 
 
-# class CreateExpense(BaseModel):
-#     category: ExpensesCategory
-#     currency: Currency
-#     amount: int | float
-#     note: Optional[str] = None
-#     expense_date: datetime
+class CreateExpense(BaseModel):
+    category: ExpensesCategory
+    currency: Currency
+    amount: int | float
+    note: Optional[str] = None
+    expense_date: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class GetExpenses(BaseModel):
-    category: str
-    currency: str
-    amount: int | float
+    id: uuid.UUID
+    category_name: str
+    currency_symbol: str
+    amount: str
     note: str
-    expense_date: datetime
+    year: str
+    month: str
+    day: str
 
-    model_config = SettingsConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class Token(BaseModel):
@@ -79,3 +111,8 @@ class Token(BaseModel):
 class TokenPayload(BaseModel):
     sub: uuid.UUID | None = None
     exp: int | None = None
+
+
+class PaginationParams(BaseModel):
+    limit: int = Field(30, ge=1, le=50)
+    offset: int = Field(0, le=50)
