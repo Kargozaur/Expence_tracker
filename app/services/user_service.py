@@ -98,5 +98,5 @@ class UserService:
         }
 
     async def logout_user(self, user_id):
-        """If front-end would be made, revokes token, setting expire_date at db at the current datetime."""
+        """If front-end is done, revokes token, setting expire_date at db to datetime.now()"""
         await self.token_repository.revoke_token(user_id)
