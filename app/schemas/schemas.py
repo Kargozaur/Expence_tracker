@@ -1,16 +1,22 @@
 from datetime import datetime
 import re
 from enum import StrEnum
-from typing import Optional
+from typing import Optional, Annotated
 from pydantic import (
     BaseModel,
     EmailStr,
     Field,
     field_validator,
     ConfigDict,
-    Field,
+    AfterValidator,
 )
 import uuid
+from utility.spent_validator import is_positive
+from utility.date_validator import validate_date
+from decimal import Decimal
+
+CheckExpense = Annotated[Decimal, AfterValidator(is_positive)]
+NotInFuture = Annotated[datetime, AfterValidator(validate_date)]
 
 
 class ExpensesCategory(StrEnum):
@@ -83,17 +89,15 @@ class LoginUser(BaseModel):
 class CreateExpense(BaseModel):
     category: ExpensesCategory
     currency: Currency
-    amount: int | float
+    amount: CheckExpense = Field(..., gt=0)
     note: Optional[str] = None
-    expense_date: datetime
-
-    model_config = ConfigDict(from_attributes=True)
+    expense_date: NotInFuture
 
 
 class GetExpenses(BaseModel):
     id: int
     category_name: str
-    currency_symbol: str
+    currency_code: str
     amount: str
     note: str
     year: str
@@ -101,6 +105,14 @@ class GetExpenses(BaseModel):
     day: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class UpdateExpense(BaseModel):
+    category_name: ExpensesCategory | None = None
+    currency_code: Currency | None = None
+    amount: CheckExpense | None = None
+    expense_date: NotInFuture | None = None
+    note: str | None = None
 
 
 class Token(BaseModel):
