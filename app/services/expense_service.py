@@ -45,31 +45,31 @@ class ExpenseService:
         self.category_map: dict[str, int] = category_map
 
     async def create_expense(
-        self, user_id: uuid.UUID, user_credential: CreateExpense
+        self, user_id: uuid.UUID, user_data: CreateExpense
     ) -> GetExpenses:
         currency_id: int | None = self.currency_map[
-            user_credential.currency.value
+            user_data.currency.value
         ]
         if not currency_id:
             raise CurrencyDoesNotExists(
-                f"Currency {user_credential.currency} is not supported"
+                f"Currency {user_data.currency} is not supported"
             )
 
         category_id: int | None = self.category_map[
-            user_credential.category.value
+            user_data.category.value
         ]
         if not category_id:
             raise CategoryDoesNotExists(
-                f"Category {user_credential.category} is not supported"
+                f"Category {user_data.category} is not supported"
             )
 
         expense = Expenses(
             user_id=user_id,
             category_id=category_id,
             currency_id=currency_id,
-            amount=user_credential.amount,
-            note=user_credential.note,
-            expense_date=user_credential.expense_date,
+            amount=user_data.amount,
+            note=user_data.note,
+            expense_date=user_data.expense_date,
         )
         async with self._db_session.begin():
             new_expense = await self.expense_repo.create_expense(
