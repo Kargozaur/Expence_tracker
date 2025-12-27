@@ -6,9 +6,7 @@ from models.models import Category
 
 class ICategoryRepository(ABC):
     @abstractmethod
-    async def get_category_by_id(
-        self, category_name: str
-    ) -> Category | None:
+    async def get_all(self):
         pass
 
 
@@ -16,11 +14,9 @@ class CategoryRepository(ICategoryRepository):
     def __init__(self, db: AsyncSession):
         self._db_session = db
 
-    async def get_category_by_id(
-        self, category_name
-    ) -> Category | None:
-        query = select(Category).where(
-            Category.category_name == category_name
-        )
+    async def get_all(
+        self,
+    ):
+        query = select(Category)
         result = await self._db_session.execute(query)
-        return result.scalar_one_or_none()
+        return result.scalars().all()

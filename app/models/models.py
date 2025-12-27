@@ -58,6 +58,13 @@ class User(Base):
 class Expenses(Base):
     """
     common table user -> expenses <- category, currency
+    Fields:
+        user_id
+        category_id
+        currency_id
+        amount
+        note
+        expense_date
     """
 
     __tablename__ = "expenses"

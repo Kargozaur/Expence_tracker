@@ -14,5 +14,17 @@ class UserAlreadyExists(Exception):
     pass
 
 
-class ExpensesDoesNotExists(Exception):
+class ExpenseDoesNotExists(Exception):
+    pass
+
+
+class ExpensesDoesNotExist(Exception):
+    pass
+
+
+class CurrencyDoesNotExists(Exception):
+    pass
+
+
+class CategoryDoesNotExists(Exception):
     pass

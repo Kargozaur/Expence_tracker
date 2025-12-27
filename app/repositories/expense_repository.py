@@ -13,6 +13,7 @@ from models.models import Expenses, Category, Currency
 from schemas.schemas import (
     GetExpenses,
     PaginationParams,
+    UpdateExpense,
 )
 
 
@@ -39,12 +40,15 @@ class IExpenseRepository(ABC):
         pass
 
     @abstractmethod
-    async def create_expense(self, expense_data: dict):
+    async def create_expense(self, expense_data: Expenses):
         pass
 
     @abstractmethod
     async def change_expense(
-        self, user_id: uuid.UUID, expense_id: int, new_data: dict
+        self,
+        user_id: uuid.UUID,
+        expense_id: int,
+        new_data: UpdateExpense,
     ):
         pass
 
@@ -147,10 +151,8 @@ class ExpenseRepository(IExpenseRepository):
             return []
         return [GetExpenses.model_validate(row) for row in rows]
 
-    async def create_expense(self, expense_data: dict):
-        expenses = Expenses(**expense_data)
-        self._db_session.add(expenses)
-        await self._db_session.flush()
+    async def create_expense(self, expense_data: Expenses):
+        self._db_session.add(expense_data)
 
     async def delete_expense(
         self, user_id: uuid.UUID, expense_id: int
@@ -169,10 +171,12 @@ class ExpenseRepository(IExpenseRepository):
         )
 
         await self._db_session.execute(deletion_query)
-        await self._db_session.flush()
 
     async def change_expense(
-        self, user_id: uuid.UUID, expense_id: int, new_data: dict
+        self,
+        user_id: uuid.UUID,
+        expense_id: int,
+        new_data: UpdateExpense,
     ) -> bool:
         """
         Returns True if row was found and updated
@@ -180,7 +184,7 @@ class ExpenseRepository(IExpenseRepository):
         """
         query = (
             update(Expenses)
-            .values(**new_data)
+            .values(new_data.model_dump())
             .where(
                 Expenses.user_id == user_id, Expenses.id == expense_id
             )
@@ -188,6 +192,4 @@ class ExpenseRepository(IExpenseRepository):
         )
         result = await self._db_session.execute(query)
         row = result.rowcount > 0
-        if row:
-            await self._db_session.flush()
         return row
