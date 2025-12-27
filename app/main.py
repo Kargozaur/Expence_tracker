@@ -1,19 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine
-from contextlib import asynccontextmanager
-from models.models import Base
 from routers import users
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    yield
-    await engine.dispose()
-
+from lifespan import lifespan
 
 app = FastAPI(lifespan=lifespan)
 
