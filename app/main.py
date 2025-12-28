@@ -24,7 +24,7 @@ async def log_request(request: Request, call_next):
     duration_ms = duration * 1000
     logger.info(
         f"{request.client.host} - {request.method} {request.url.path} "
-        f"→ {response.status_code} ({duration_ms:.1f}ms)"
+        f"-> {response.status_code} ({duration_ms:.1f}ms)"
     )
     return response
 
