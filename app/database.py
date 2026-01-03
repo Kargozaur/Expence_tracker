@@ -23,5 +23,4 @@ async def get_db():  # type: ignore
         except:
             await session.rollback()  # type: ignore
             raise
-        finally:
-            await session.close()  # type: ignore
+
